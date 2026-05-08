@@ -2,9 +2,9 @@
 
 本文档说明如何把 Semtech USP / LR2021 的 Zephyr 示例放到 nRF Connect SDK v3.3.0 中，并通过 Nordic VS Code 插件或命令行编译。
 
-## 目标目录
+## 目录位置
 
-本次整理后的目录结构如下：
+`semtech_samples` 可以放在 nRF Connect SDK 根目录下，也可以拷贝到其它任意目录。示例：
 
 ```text
 C:/ncs/v3.3.0/
@@ -25,7 +25,13 @@ C:/ncs/v3.3.0/
     `-- tx_cw/
 ```
 
-`semtech_samples` 是 NCS v3.3.0 根目录下新增的示例目录。所有适配 NCS 的修改都限制在这个目录内。
+或：
+
+```text
+D:/work/semtech_samples/
+```
+
+工程会优先通过 `ZEPHYR_BASE` 自动推导 NCS 根目录；如果自动推导失败，可以在编译时传入 `-DNCS_ROOT=C:/ncs/v3.3.0`。
 
 ## 拉取仓库
 
@@ -48,7 +54,22 @@ C:/ncs/v3.3.0/modules/usp_zephyr
 C:/ncs/v3.3.0/modules/lib/usp
 ```
 
-这两个目录可以直接使用 GitHub 拉取下来的原始文件，不需要修改。
+`modules/lib/usp` 可以直接使用 GitHub 拉取下来的原始文件。
+
+`modules/usp_zephyr` 建议做一个小改动，避免 Nordic VS Code 插件长时间停在 `Devicetree loading context...`。打开：
+
+```text
+C:/ncs/v3.3.0/modules/usp_zephyr/zephyr/module.yml
+```
+
+把 `settings` 里的 `board_root` 和 `dts_root` 删除，只保留：
+
+```yaml
+settings:
+  module_ext_root: .
+```
+
+原因是本工程已经把 LR2021 的 overlay 和必要 binding 放在 `semtech_samples` 内部了，不再需要让 Zephyr/VS Code 把整个 Semtech 模块作为 Devicetree root 扫描。
 
 ## 示例来源
 
@@ -61,8 +82,9 @@ C:/ncs/v3.3.0/modules/usp_zephyr/samples/
 本目录对这些示例做了 NCS 适配：
 
 - 自动加入 `modules/usp_zephyr` 和 `modules/lib/usp`
-- 默认使用 `semtech_wio_lr2021` shield
-- 每个示例带本地 `Kconfig` 兼容项，避免修改 `usp_zephyr` 模块
+- 默认使用本仓库内的 `boards/semtech_wio_lr2021.overlay`
+- 默认使用本仓库内的 `dts/bindings/usp/*.yaml`
+- 每个示例带本地 `Kconfig` 兼容项，避免改动 `usp_zephyr` 的 Kconfig
 - 默认关闭实验性配置警告
 - 对需要角色宏的示例补了默认角色
 
@@ -114,21 +136,52 @@ Base configuration files
 Extra Kconfig fragments
 Base Devicetree overlays
 Extra Devicetree overlays
-Extra CMake arguments
 ```
 
-因为示例自己的 `CMakeLists.txt` 已经自动设置了 USP 模块路径和默认 shield，所以插件里不需要再手动添加 CMake 参数。
+因为示例自己的 `CMakeLists.txt` 已经自动设置了 USP 模块路径和本地 LR2021 overlay，所以插件里不需要再手动添加 CMake 参数或 shield。
+
+如果需要直接使用 VS Code 插件的 `Flash` 按钮给 Seeed XIAO nRF54L15 下载程序，建议在 `Extra CMake arguments` 中加入：
+
+```text
+-DBOARD_FLASH_RUNNER=pyocd
+```
+
+然后执行一次 pristine build。XIAO nRF54L15 板载 SAMD11 CMSIS-DAP 调试器，Zephyr 默认 flash runner 是 `openocd`，但 Nordic VS Code 插件选择设备后会传入 `--dev-id` 参数，而 `openocd` runner 不支持该参数，可能出现：
+
+```text
+FATAL ERROR: openocd doesn't support --dev-id option
+```
+
+把默认 flash runner 改成 `pyocd` 后，插件可以继续使用所选设备 ID 下载。成功下载时会看到类似日志：
+
+```text
+-- west flash: using runner pyocd
+Erased 106496 bytes, programmed 106496 bytes
+```
+
+`NRF54L15 is not in a secure state` 是 pyOCD 的 warning，不影响当前示例下载。
 
 ## 命令行编译
 
-以 `ping_pong` 为例：
+以 `ping_pong` 为例。应用目录可以是 NCS 内部路径，也可以是外部路径：
 
 ```powershell
 nrfutil sdk-manager toolchain launch --ncs-version v3.3.0 -- west build -p always `
   -b xiao_nrf54l15/nrf54l15/cpuapp `
   --no-sysbuild `
   -d C:/ncs/v3.3.0/build/semtech_ping_pong `
-  C:/ncs/v3.3.0/semtech_samples/ping_pong
+  D:/work/semtech_samples/ping_pong
+```
+
+如果 CMake 找不到 NCS 根目录，可以显式传入：
+
+```powershell
+nrfutil sdk-manager toolchain launch --ncs-version v3.3.0 -- west build -p always `
+  -b xiao_nrf54l15/nrf54l15/cpuapp `
+  --no-sysbuild `
+  -d C:/ncs/v3.3.0/build/semtech_ping_pong `
+  D:/work/semtech_samples/ping_pong `
+  -- -DNCS_ROOT=C:/ncs/v3.3.0
 ```
 
 以 `lrfhss` 为例：
@@ -177,7 +230,7 @@ foreach ($s in $samples) {
 SDK      : nRF Connect SDK v3.3.0
 Toolchain: nRF Connect SDK Toolchain v3.3.0
 Board    : xiao_nrf54l15/nrf54l15/cpuapp
-Shield   : semtech_wio_lr2021
+Overlay  : semtech_samples/boards/semtech_wio_lr2021.overlay
 Sysbuild : disabled
 ```
 
@@ -207,4 +260,4 @@ semtech_mbed_wio_interface
 semtech_wio_lr2021
 ```
 
-XIAO nRF54L15 当前适配中已经默认使用 `semtech_wio_lr2021`，不需要在插件里额外选择 shield。
+XIAO nRF54L15 当前适配中已经默认使用本仓库内的 `boards/semtech_wio_lr2021.overlay`，不需要在插件里额外选择 shield。

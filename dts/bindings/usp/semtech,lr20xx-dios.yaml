@@ -1,0 +1,28 @@
+description: Semtech LR20XX DIO configuration
+
+compatible: "semtech,lr20xx-dios"
+
+include: base.yaml
+
+properties:
+  "#address-cells":
+    const: 1
+  "#size-cells":
+    const: 0
+
+child-binding:
+  properties:
+    reg:
+      type: int
+      required: true
+    function:
+      type: int
+      required: true
+    sleep-drive:
+      type: int
+    irq-mask:
+      type: int
+    dio-gpios:
+      type: phandle-array
+    rf-sw:
+      type: int

@@ -1,0 +1,73 @@
+description: Semtech LR20XX LoRa radio module
+
+include: spi-device.yaml
+
+properties:
+  reset-gpios:
+    type: phandle-array
+    required: true
+  busy-gpios:
+    type: phandle-array
+    required: true
+  reg-mode:
+    type: int
+    required: true
+  hf-clk-out-scaling:
+    type: int
+  tcxo-voltage:
+    type: int
+    required: true
+  tcxo-wakeup-time:
+    type: int
+    required: true
+  lf-clk:
+    type: int
+    required: true
+  pa-ramp-time:
+    type: int
+  rx-boost-cfg:
+    type: int
+  tx-power-offset:
+    type: int
+  tx-power-cfg-lf:
+    type: array
+    required: true
+  tx-power-cfg-hf:
+    type: array
+    required: true
+  tx-dbm-to-ua-reg-mode-dcdc-lf-vreg:
+    type: array
+    required: true
+  tx-dbm-to-ua-reg-mode-ldo-lf-vreg:
+    type: array
+    required: true
+  tx-dbm-to-ua-reg-mode-dcdc-hf-vreg:
+    type: array
+    required: true
+  rx-bw-to-ua-reg-mode-dcdc-lf-vreg:
+    type: array
+    required: true
+  rx-bw-to-ua-reg-mode-dcdc-hf-vreg:
+    type: array
+    required: true
+  rx-bw-to-ua-reg-mode-dcdc-lf-vreg-boosted:
+    type: array
+    required: true
+  rx-bw-to-ua-reg-mode-dcdc-hf-vreg-boosted:
+    type: array
+    required: true
+  rx-bw-to-ua-reg-mode-ldo-lf-vreg:
+    type: array
+    required: true
+  rx-bw-to-ua-reg-mode-ldo-hf-vreg:
+    type: array
+    required: true
+  rx-bw-to-ua-reg-mode-ldo-lf-vreg-boosted:
+    type: array
+    required: true
+  rx-bw-to-ua-reg-mode-ldo-hf-vreg-boosted:
+    type: array
+    required: true
+  calibration-freqs:
+    type: array
+    required: true
