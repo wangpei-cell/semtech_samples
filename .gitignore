@@ -1,0 +1,31 @@
+# Build outputs
+build/
+build_*/
+out/
+
+# Zephyr/NCS generated files
+.west/
+.cache/
+.config
+*.map
+*.elf
+*.hex
+*.bin
+*.uf2
+*.lst
+*.log
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+zephyr_modules.txt
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*~
+Thumbs.db
+Desktop.ini

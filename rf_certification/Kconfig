@@ -1,0 +1,10 @@
+# Copyright (c) 2026
+# SPDX-License-Identifier: Apache-2.0
+
+config ZEPHYR_LORA_BASICS_MODEM_MODULE
+	bool
+	default y
+
+menu "Zephyr Kernel"
+source "Kconfig.zephyr"
+endmenu

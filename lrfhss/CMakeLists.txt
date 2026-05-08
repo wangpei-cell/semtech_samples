@@ -1,0 +1,18 @@
+# Copyright (c) 2024 Semtech Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+cmake_minimum_required(VERSION 3.13.1)
+
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/semtech_usp_ncs.cmake)
+
+find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+project(lrfhss)
+
+target_sources(app PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+  ${ZEPHYR_USP_MODULE_DIR}/examples/main_examples/lrfhss_example/app_lrfhss_example.c
+)
+
+zephyr_include_directories(
+  ${ZEPHYR_USP_MODULE_DIR}/examples/main_examples/lrfhss_example
+)
